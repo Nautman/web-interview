@@ -47,14 +47,55 @@ export const TodoListForm = ({ todoList, saveTodoList }) => {
               >
                 <CheckIcon />
               </Button>
-              <TextField
-                sx={{ flexGrow: 1, marginTop: '1rem' }}
-                label='What to do?'
-                defaultValue={title}
-                onChange={(event) => {
-                  updateTodos(index, { title: event.target.value })
+              <div
+                style={{
+                  flex: 1,
+                  flexGrow: 1,
+                  marginTop: '1rem',
+                  marginBottom: '1rem',
                 }}
-              />
+              >
+                <TextField
+                  fullWidth
+                  label='What to do?'
+                  defaultValue={title}
+                  onChange={(event) => {
+                    updateTodos(index, { title: event.target.value })
+                  }}
+                />
+                <div
+                  style={{
+                    // red if late
+                    color:
+                      todos[index].dueDate && new Date(todos[index].dueDate) < new Date()
+                        ? 'red'
+                        : 'inherit',
+                  }}
+                >
+                  <input
+                    style={{ color: 'inherit' }}
+                    type='date'
+                    label='Due Date'
+                    value={todos[index].dueDate}
+                    onChange={(event) => {
+                      updateTodos(index, { dueDate: event.target.value })
+                    }}
+                  />
+                  {todos[index].dueDate &&
+                    (new Date(todos[index].dueDate) < new Date() ? (
+                      <Typography color='error' variant='caption'>
+                        Overdue by{' '}
+                        {Math.round((new Date() - new Date(todos[index].dueDate)) / 86400000)} days
+                      </Typography>
+                    ) : (
+                      <Typography variant='caption'>
+                        Due in{' '}
+                        {Math.round((new Date(todos[index].dueDate) - new Date()) / 86400000)} days
+                      </Typography>
+                    ))}
+                </div>
+              </div>
+
               <Button
                 sx={{ margin: '8px' }}
                 size='small'
@@ -76,7 +117,7 @@ export const TodoListForm = ({ todoList, saveTodoList }) => {
               type='button'
               color='primary'
               onClick={() => {
-                setTodos([...todos, { title: '', completed: false }])
+                setTodos([...todos, { title: '', completed: false, dueDate: undefined }])
               }}
             >
               Add Todo <AddIcon />

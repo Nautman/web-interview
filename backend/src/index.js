@@ -49,11 +49,20 @@ app.put('/list/:id', (req, res) => {
 
   // Validate each todo
   const validTodos = todos.every((todo) => {
-    if (!todo.title) {
+    // Check if title is string and 0 <= length <= 128
+    if (typeof todo.title !== 'string' || todo.title.length > 128) {
       return false
     }
-    if (todo.completed === undefined) {
+    // Check if completed is boolean
+    if (todo.completed !== true && todo.completed !== false) {
       return false
+    }
+    // Check if due date is defined, and is a valid date of format YYYY-MM-DD by parsing it
+    if (todo.dueDate) {
+      const dueDate = new Date(todo.dueDate)
+      if (dueDate.toString() === 'Invalid Date') {
+        return false
+      }
     }
     return true
   })
