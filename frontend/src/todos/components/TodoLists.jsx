@@ -11,6 +11,7 @@ import {
 import ReceiptIcon from '@mui/icons-material/Receipt'
 import { TodoListForm } from './TodoListForm'
 import { useTodoLists } from '../../hooks'
+import { calcListCompletion } from '../../misc/calcListCompletion'
 
 export const TodoLists = ({ style }) => {
   const { todoLists, updateList } = useTodoLists()
@@ -23,14 +24,32 @@ export const TodoLists = ({ style }) => {
         <CardContent>
           <Typography component='h2'>My Todo Lists</Typography>
           <List>
-            {Object.keys(todoLists).map((key) => (
-              <ListItemButton key={key} onClick={() => setActiveList(key)}>
-                <ListItemIcon>
-                  <ReceiptIcon />
-                </ListItemIcon>
-                <ListItemText primary={todoLists[key].title} />
-              </ListItemButton>
-            ))}
+            {Object.keys(todoLists).map((key) => {
+              const [completedTodos, totalTodos] = calcListCompletion(todoLists[key].todos)
+
+              return (
+                <ListItemButton key={key} onClick={() => setActiveList(key)}>
+                  <ListItemIcon>
+                    <ReceiptIcon />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={todoLists[key].title}
+                    // strikethrough completed todos
+                    secondary={
+                      totalTodos !== 0 && (
+                        <span
+                          style={{
+                            textDecoration: completedTodos === totalTodos ? 'line-through' : 'none',
+                          }}
+                        >
+                          {completedTodos} / {totalTodos} completed
+                        </span>
+                      )
+                    }
+                  />
+                </ListItemButton>
+              )
+            })}
           </List>
         </CardContent>
       </Card>
