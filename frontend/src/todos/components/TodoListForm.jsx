@@ -6,13 +6,15 @@ import CheckIcon from '@mui/icons-material/Check'
 
 export const TodoListForm = ({ todoList, saveTodoList }) => {
   const [todos, setTodos] = useState(todoList.todos)
+  const [updated, setUpdated] = useState(false)
 
   useEffect(() => {
+    if (!updated) return
     const timeout = setTimeout(() => {
       saveTodoList(todoList.id, { todos })
     }, 300)
     return () => clearTimeout(timeout)
-  }, [todos, todoList.id, saveTodoList])
+  }, [todos, todoList.id, saveTodoList, updated])
 
   const updateTodos = (index, newTodo) => {
     setTodos([
@@ -24,6 +26,7 @@ export const TodoListForm = ({ todoList, saveTodoList }) => {
       },
       ...todos.slice(index + 1),
     ])
+    setUpdated(true)
   }
 
   return (
