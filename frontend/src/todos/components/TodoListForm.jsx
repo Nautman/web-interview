@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { TextField, Card, CardContent, CardActions, Button, Typography } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
-import CheckIcon from '@mui/icons-material/Check'
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 
 export const TodoListForm = ({ todoList, saveTodoList }) => {
   const [todos, setTodos] = useState(todoList.todos)
@@ -33,87 +34,104 @@ export const TodoListForm = ({ todoList, saveTodoList }) => {
     <Card sx={{ margin: '0 1rem' }}>
       <CardContent>
         <Typography component='h2'>{todoList.title}</Typography>
-        <form style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-          {todos.map(({ title }, index) => (
-            <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
-              <Typography sx={{ margin: '8px' }} variant='h6'>
-                {index + 1}
-              </Typography>
-              <Button
-                sx={{ margin: '8px' }}
-                size='small'
-                color={todos[index].completed ? 'success' : 'primary'}
-                onClick={() => {
-                  updateTodos(index, { completed: !todos[index].completed })
-                }}
-              >
-                <CheckIcon />
-              </Button>
+        <form
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            flexGrow: 1,
+          }}
+        >
+          {todos.map(({ title, completed, dueDate }, index) => {
+            const isLate = dueDate && new Date(dueDate) < new Date()
+            return (
               <div
+                key={index}
                 style={{
-                  flex: 1,
-                  flexGrow: 1,
-                  marginTop: '1rem',
-                  marginBottom: '1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  border: '1px solid #ccc',
+                  borderRadius: '0.5rem',
+                  margin: '0.5rem 0',
                 }}
               >
+                <Button
+                  sx={{ margin: '8px' }}
+                  size='small'
+                  onClick={() => {
+                    updateTodos(index, { completed: !completed })
+                  }}
+                >
+                  {completed ? <CheckCircleIcon /> : <CheckCircleOutlineIcon />}
+                </Button>
                 <TextField
                   fullWidth
-                  label='What to do?'
+                  placeholder='What to do?'
                   defaultValue={title}
                   onChange={(event) => {
                     updateTodos(index, { title: event.target.value })
                   }}
+                  variant='standard'
+                  inputProps={{
+                    // strikethrough completed todos
+                    style: {
+                      textDecorationLine: completed ? 'line-through' : 'none',
+                      color: completed ? 'gray' : 'inherit',
+                    },
+                  }}
                 />
-                <div
+                <Typography
+                  variant='body1'
                   style={{
-                    // red if late
-                    color:
-                      todos[index].dueDate && new Date(todos[index].dueDate) < new Date()
-                        ? 'red'
-                        : 'inherit',
+                    // Don't break text
+                    whiteSpace: 'nowrap',
+                    color: completed ? 'gray' : isLate ? 'red' : 'inherit',
+                    borderBottom: '1px solid gray',
+                    height: '1.95rem',
+                    lineHeight: '2rem',
                   }}
                 >
-                  <input
-                    style={{ color: 'inherit' }}
+                  {dueDate &&
+                    !completed &&
+                    (isLate
+                      ? `${Math.round(
+                          (new Date() - new Date(todos[index].dueDate)) / 86400000
+                        )} days late, `
+                      : `due in ${Math.round(
+                          (new Date(todos[index].dueDate) - new Date()) / 86400000
+                        )} days, `)}
+                </Typography>
+                <div>
+                  <TextField
+                    sx={{
+                      input: {
+                        color: completed ? 'gray' : isLate ? 'red' : 'inherit',
+                      },
+                    }}
                     type='date'
-                    label='Due Date'
-                    value={todos[index].dueDate}
+                    variant='standard'
+                    defaultValue={todos[index].dueDate}
                     onChange={(event) => {
                       updateTodos(index, { dueDate: event.target.value })
                     }}
                   />
-                  {todos[index].dueDate &&
-                    (new Date(todos[index].dueDate) < new Date() ? (
-                      <Typography color='error' variant='caption'>
-                        Overdue by{' '}
-                        {Math.round((new Date() - new Date(todos[index].dueDate)) / 86400000)} days
-                      </Typography>
-                    ) : (
-                      <Typography variant='caption'>
-                        Due in{' '}
-                        {Math.round((new Date(todos[index].dueDate) - new Date()) / 86400000)} days
-                      </Typography>
-                    ))}
                 </div>
+                <Button
+                  sx={{ margin: '8px' }}
+                  size='small'
+                  color='inherit'
+                  onClick={() => {
+                    setTodos([
+                      // immutable delete
+                      ...todos.slice(0, index),
+                      ...todos.slice(index + 1),
+                    ])
+                  }}
+                >
+                  <DeleteIcon />
+                </Button>
               </div>
-
-              <Button
-                sx={{ margin: '8px' }}
-                size='small'
-                color='secondary'
-                onClick={() => {
-                  setTodos([
-                    // immutable delete
-                    ...todos.slice(0, index),
-                    ...todos.slice(index + 1),
-                  ])
-                }}
-              >
-                <DeleteIcon />
-              </Button>
-            </div>
-          ))}
+            )
+          })}
           <CardActions>
             <Button
               type='button'
