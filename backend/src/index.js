@@ -41,6 +41,28 @@ app.put('/list/:id', (req, res) => {
     return
   }
   const { todos } = req.body
+
+  if (!todos) {
+    res.status(400).send('Missing todos')
+    return
+  }
+
+  // Validate each todo
+  const validTodos = todos.every((todo) => {
+    if (!todo.title) {
+      return false
+    }
+    if (todo.completed === undefined) {
+      return false
+    }
+    return true
+  })
+
+  if (!validTodos) {
+    res.status(400).send('Invalid todos')
+    return
+  }
+
   lists.set(id, {
     ...lists.get(id),
     todos,
