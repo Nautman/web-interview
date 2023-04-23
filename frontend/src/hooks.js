@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import api from './api'
 
 export function useTodoLists() {
@@ -8,14 +8,14 @@ export function useTodoLists() {
     api.getTodoLists().then(setTodoLists)
   }
 
-  const updateList = ({ listId, todos }) => {
+  const updateList = useCallback(({ listId, todos }) => {
     api.updateList({ listId, todos }).then((newList) => {
       setTodoLists((todos) => ({
         ...todos,
         [listId]: newList,
       }))
     })
-  }
+  }, [])
 
   useEffect(() => {
     getTodoLists()
